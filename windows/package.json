@@ -1,0 +1,35 @@
+{
+  "name": "nzema-east-ehr-windows",
+  "version": "1.0.0",
+  "description": "Nzema East Municipal Health Facilities EHR",
+  "author": "J. O. ACQUAAH",
+  "main": "electron/main.js",
+  "scripts": {
+    "sync": "node -e \"require('fs').cpSync('../web','www',{recursive:true})\"",
+    "start": "npm run sync && electron .",
+    "build": "npm run sync && electron-builder --win nsis --x64 --publish never"
+  },
+  "build": {
+    "appId": "gh.nzemaeast.ehr",
+    "productName": "Nzema East EHR",
+    "copyright": "© 2026 J. O. ACQUAAH. All Rights Reserved.",
+    "files": [
+      "electron/**",
+      "www/**"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
