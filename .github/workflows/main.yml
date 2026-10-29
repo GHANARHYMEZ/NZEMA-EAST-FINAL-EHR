@@ -1,0 +1,67 @@
+name: Build installers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows .exe
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm install
+      - name: Build installer
+        run: npm run build
+      - name: Show output
+        run: dir dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: windows/dist/*.exe
+          if-no-files-found: error
+
+  android:
+    name: Android .apk
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install
+        run: npm install
+      - name: Copy web app into project
+        run: npm run sync
+      - name: Create Android project
+        run: npx cap add android
+      - name: App icons (optional, will not stop the build)
+        continue-on-error: true
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#0b4f4a'
+      - name: Sync
+        run: npx cap sync android
+      - name: Build APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
